@@ -30,7 +30,7 @@ jobs:
       - name: Executar testes unitários
         run: |
           export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_URL="${{ secrets.MYSQL_URL }}"
+          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
           mvn test
 
       - name: Generate JaCoco Badge
@@ -76,7 +76,7 @@ jobs:
       - name: Build com Maven
         run: |
           export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_URL="${{ secrets.MYSQL_URL }}"
+          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
           mvn package
 
 
@@ -110,7 +110,7 @@ jobs:
       - name: Publish package
         run: |
           export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_URL="${{ secrets.MYSQL_URL }}"
+          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
           mvn --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
