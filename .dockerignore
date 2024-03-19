@@ -1,0 +1,5 @@
+# .dockerignore
+.idea
+target
+docker-compose.yml
+Dockerfile
