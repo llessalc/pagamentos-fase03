@@ -1,0 +1,32 @@
+name: Build and Push Docker Image to ECR
+on:
+
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy-aws-ecr:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configurando credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag e push da imagem no Amazon ECR
+        run: |
+          docker build -t api-pagamentos .
+          docker tag api-pagamentos:latest ${{ secrets.URI_REPOSITORY }}:latest
+          docker push ${{ secrets.URI_REPOSITORY }}:latest
