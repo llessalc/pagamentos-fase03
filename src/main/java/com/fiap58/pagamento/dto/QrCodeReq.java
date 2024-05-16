@@ -11,11 +11,12 @@ public record QrCodeReq (
         List<ItemDto> items,
         String notification_url,
         String title,
-        BigDecimal total_amount
+        BigDecimal total_amount,
+        String expiration_date
 ){
-    public QrCodeReq(Pagamento pagamento, List<ItemDto> items){
-        this("Pedido", String.valueOf(pagamento.getIdPedido()), items, "https://www.yourserver.com/notifications",
-                "Product Order", pagamento.getValorTotal());
+    public QrCodeReq(Pagamento pagamento, List<ItemDto> items, String notificationUrl, String expirationDate){
+        this("Pedido", String.valueOf(pagamento.getIdPedido()), items, notificationUrl,
+                "Product Order", pagamento.getValorTotal(), expirationDate);
     }
 
 
