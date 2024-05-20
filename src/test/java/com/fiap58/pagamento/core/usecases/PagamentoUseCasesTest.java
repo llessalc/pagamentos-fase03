@@ -3,7 +3,9 @@ package com.fiap58.pagamento.core.usecases;
 import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
+import com.fiap58.pagamento.gateway.ConsumirPedidos;
 import com.fiap58.pagamento.gateway.DBGateway;
+import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
 import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
 import com.fiap58.pagamento.mocks.ConsumerPedidosMock;
 import org.junit.jupiter.api.AfterEach;
@@ -29,9 +31,9 @@ class PagamentoUseCasesTest {
     @Mock
     DBGateway dbGateway;
     @Mock
-    ConsumerApiMPMock consumerApiMP;
+    ImplConsumerApiMP consumerApiMP;
     @Mock
-    ConsumerPedidosMock consumerPedidos;
+    ConsumirPedidos consumerPedidos;
 
     @InjectMocks
     PagamentoUseCases pagamentoUseCases;
