@@ -35,7 +35,14 @@ class DBGatewayTest {
     @Test
     void listarPagamentos() {
 
-        List<PagamentoDto> pagamentos = this.dbGateway.listarPagamentos(2);
+        List<PagamentoDto> pagamentos = this.dbGateway.listarPagamentos(1);
+        assertThat(pagamentos.size(), equalTo(1));
+    }
+
+    @Test
+    void listarPagamentos_Unbounded() {
+
+        List<PagamentoDto> pagamentos = this.dbGateway.listarPagamentos(-1);
         assertThat(pagamentos.size(), greaterThanOrEqualTo(2));
     }
 

@@ -181,6 +181,63 @@ class PagamentoUseCasesTest {
     }
 
     @Test
+    void confirmarPagamentoHook_UnexpectedStatus() {
+        // Arrange
+        long externalReference = 1L;
+        BigDecimal valorTotal = new BigDecimal("22");
+        String status = "unexpected";
+        String whResource = "api.mercadolibre.com/merchant_orders";
+        String whTopic = "merchant_orders";
+
+        PagamentoDto pagamentoDto = new PagamentoDto(externalReference, valorTotal);
+        PagamentoDto spyPagamentoDto = spy(pagamentoDto);
+
+        PagamentoWhStatusDto pagamentoWhStatusDto = new PagamentoWhStatusDto(status, externalReference);
+
+        PagamentoWhDto pagamentoWhDto = new PagamentoWhDto(whResource, whTopic);
+
+
+        when(consumerApiMP.retornaPagamentoStatus(any(String.class))).thenReturn(pagamentoWhStatusDto);
+        when(dbGateway.buscarPagamentoPorIdPedido(any(Long.class))).thenReturn(Optional.of(spyPagamentoDto));
+        when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
+
+        // Act
+        String statusRes = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+
+        // Assert
+        assertEquals(StatusPagamento.CRIADO, spyPagamentoDto.getStatus());
+        assertEquals(status, statusRes);
+
+    }
+
+    @Test
+    void confirmarPagamentoHook_PagamentoNotFound() {
+        // Arrange
+        long externalReference = 1L;
+        BigDecimal valorTotal = new BigDecimal("22");
+        String status = "unexpected";
+        String whResource = "api.mercadolibre.com/merchant_orders";
+        String whTopic = "merchant_orders";
+
+        PagamentoDto pagamentoDto = new PagamentoDto(externalReference, valorTotal);
+        PagamentoDto spyPagamentoDto = spy(pagamentoDto);
+
+        PagamentoWhStatusDto pagamentoWhStatusDto = new PagamentoWhStatusDto(status, externalReference);
+
+        PagamentoWhDto pagamentoWhDto = new PagamentoWhDto(whResource, whTopic);
+
+        when(consumerApiMP.retornaPagamentoStatus(any(String.class))).thenReturn(pagamentoWhStatusDto);
+
+        // Act
+        String statusRes = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+
+        // Assert
+        assertEquals(status, statusRes);
+        verify(dbGateway, never()).savePagamento(any());
+
+    }
+
+    @Test
     void confirmarPagamentoHook_notOrder() {
         // Arrange
         String whResource = "api.mercadolibre.com/anything";
@@ -214,6 +271,21 @@ class PagamentoUseCasesTest {
 
     }
 
+
+    @Test
+    void confirmarPagamentoManual_PagamentoNotFound() {
+        // Arrange
+        Long pagamentoId = 1L;
+
+        // Act
+        Boolean confirmation = pagamentoUseCases.confirmarPagamentoManual(pagamentoId);
+
+        // Assert
+        assertEquals(Boolean.FALSE, confirmation);
+        verify(dbGateway, never()).savePagamento(any());
+
+    }
+
     @Test
     void checkOrderNotification() {
         //Arrange
@@ -237,4 +309,15 @@ class PagamentoUseCasesTest {
         //Assert
         assertEquals(Boolean.FALSE, isOrderNotification);
     }
+
+    @Test
+    void checkOrderNotificationFalse_NullUrl() {
+        //Act
+        Boolean isOrderNotification = pagamentoUseCases.checkOrderNotification(null);
+
+        //Assert
+        assertEquals(Boolean.FALSE, isOrderNotification);
+    }
 }
+
+
