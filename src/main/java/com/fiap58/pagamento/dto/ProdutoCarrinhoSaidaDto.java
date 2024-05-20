@@ -1,8 +1,6 @@
 package com.fiap58.pagamento.dto;
 
-import java.math.BigDecimal;
-
-public record ProdutoCarrinhoSaida(
+public record ProdutoCarrinhoSaidaDto(
             String nome,
             int quantidade,
             String precoAtual) {

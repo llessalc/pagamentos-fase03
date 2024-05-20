@@ -1,4 +1,4 @@
-package com.fiap58.pagamento.gateway;
+package com.fiap58.pagamento.interfaces;
 
 import com.fiap58.pagamento.dto.DadosPedidoDto;
 import org.springframework.http.ResponseEntity;
