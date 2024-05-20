@@ -24,9 +24,11 @@ public class ImplConsumerApiMP implements ConsumerApiMP {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     public QrCodeDto retornaQrCode(Pagamento pagamento) {
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         String token = environment.getProperty("mp.token");
@@ -34,6 +36,8 @@ public class ImplConsumerApiMP implements ConsumerApiMP {
         headers.set("Authorization", "Bearer " + token);
 
         String apiMercadoPago = environment.getProperty("qr.url");
+        System.out.println("API MERCADO PAGO:");
+        System.out.println(environment.getProperty("qr.url"));
 
         //Set expirationDate - now + 3 days - for the new order
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSz");
@@ -56,7 +60,6 @@ public class ImplConsumerApiMP implements ConsumerApiMP {
     public PagamentoWhStatusDto retornaPagamentoStatus(String url) {
 
         System.out.println(url);
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         String token = environment.getProperty("mp.token");

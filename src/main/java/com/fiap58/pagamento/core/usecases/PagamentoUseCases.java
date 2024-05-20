@@ -6,6 +6,7 @@ import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
 import com.fiap58.pagamento.gateway.DBGateway;
 import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
+import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
 import com.fiap58.pagamento.mocks.ConsumerPedidosMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class PagamentoUseCases {
     private ConsumerPedidosMock consumerPedidos;
 
     @Autowired
-    private ImplConsumerApiMP consumerApiMP;
+    private ConsumerApiMPMock consumerApiMP;
 
 
     public PagamentoDto criarPagamento(long id) {

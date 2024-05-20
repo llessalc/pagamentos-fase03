@@ -1,21 +1,16 @@
 package com.fiap58.pagamento.core.usecases;
 
-import com.fiap58.pagamento.adapter.PagamentoToPagamentoDto;
 import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
 import com.fiap58.pagamento.gateway.DBGateway;
-import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
+import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
 import com.fiap58.pagamento.mocks.ConsumerPedidosMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,7 +29,7 @@ class PagamentoUseCasesTest {
     @Mock
     DBGateway dbGateway;
     @Mock
-    ImplConsumerApiMP consumerApiMP;
+    ConsumerApiMPMock consumerApiMP;
     @Mock
     ConsumerPedidosMock consumerPedidos;
 

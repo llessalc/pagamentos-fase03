@@ -7,16 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main'
 
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD  }}
-          MYSQL_DATABASE: pagamento_58
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
@@ -29,9 +19,12 @@ jobs:
 
       - name: Executar testes unitários
         run: |
-          export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
-          mvn test
+          export QR_URL="${{ secrets.QR_URL }}"
+          export MP_TOKEN="${{ secrets.MP_TOKEN }}"
+          export PAGAMENTO_WH="${{ secrets.PAGAMENTO_WH }}"
+          export PEDIDOS_SERVICE="${{ secrets.PEDIDOS_SERVICE }}"
+          mvn clean
+          mvn test -P test
 
       - name: Generate JaCoco Badge
         id: jacoco
@@ -52,16 +45,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit-test
 
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD  }}
-          MYSQL_DATABASE: pagamento_58
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
@@ -75,9 +58,11 @@ jobs:
 
       - name: Build com Maven
         run: |
-          export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
-          mvn package
+          export QR_URL="${{ secrets.QR_URL }}"
+          export MP_TOKEN="${{ secrets.MP_TOKEN }}"
+          export PAGAMENTO_WH="${{ secrets.PAGAMENTO_WH }}"
+          export PEDIDOS_SERVICE="${{ secrets.PEDIDOS_SERVICE }}"
+          mvn package -P test
 
 
   publish:
@@ -87,16 +72,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD  }}
-          MYSQL_DATABASE: pagamento_58
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout do código
@@ -109,8 +84,10 @@ jobs:
           package: '*.jar'
       - name: Publish package
         run: |
-          export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
-          export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
-          mvn --batch-mode deploy
+          export QR_URL="${{ secrets.QR_URL }}"
+          export MP_TOKEN="${{ secrets.MP_TOKEN }}"
+          export PAGAMENTO_WH="${{ secrets.PAGAMENTO_WH }}"
+          export PEDIDOS_SERVICE="${{ secrets.PEDIDOS_SERVICE }}"
+          mvn --batch-mode deploy -P test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

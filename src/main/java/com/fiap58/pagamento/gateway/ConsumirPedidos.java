@@ -17,10 +17,12 @@ public class ConsumirPedidos implements ConsumerPedidos {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     public DadosPedidoDto retornarPedido(Long id) {
         String pedidosService = environment.getProperty("pedidos.service");
-        RestTemplate restTemplate = new RestTemplate();
 
         String url_padrao = String.format("http://%s:8080/pedidos", pedidosService);
         StringBuilder urlBuilder = new StringBuilder();
@@ -33,7 +35,6 @@ public class ConsumirPedidos implements ConsumerPedidos {
 
     @Override
     public DadosPedidoDto confirmaPagamento(Long id) {
-        RestTemplate restTemplate = new RestTemplate();
         String pedidosService = environment.getProperty("pedidos.service");
         String url_padrao = String.format("http://%s:8080/pedidos", pedidosService);
         StringBuilder urlBuilder = new StringBuilder();
