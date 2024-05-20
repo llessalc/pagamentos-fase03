@@ -4,6 +4,7 @@ import com.fiap58.pagamento.adapter.PagamentoToPagamentoDto;
 import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
+import com.fiap58.pagamento.gateway.ConsumirPedidos;
 import com.fiap58.pagamento.gateway.DBGateway;
 import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
 import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
@@ -22,10 +23,10 @@ public class PagamentoUseCases {
     private DBGateway dbGateway;
 
     @Autowired
-    private ConsumerPedidosMock consumerPedidos;
+    private ConsumirPedidos consumerPedidos;
 
     @Autowired
-    private ConsumerApiMPMock consumerApiMP;
+    private ImplConsumerApiMP consumerApiMP;
 
 
     public PagamentoDto criarPagamento(long id) {
