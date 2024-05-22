@@ -32,7 +32,7 @@ jobs:
 
       - name: Deploy to EKS
         env:
-          IMAGE_TAG: app-pedidos
+          IMAGE_TAG: app-pagamentos
         run: |
           sed -i.bak "s|DOCKER_IMAGE|${{ secrets.URI_REPOSITORY }}:$IMAGE_TAG|g;s|DB_HOST|${{ secrets.DB_HOST }}|g;s|QR_URL_VALUE|${{ secrets.QR_URL_VALUE }}|g;s|MP_TOKEN_VALUE|${{ secrets.MP_TOKEN_VALUE }}|g;s|PAGAMENTO_WH_VALUE|${{ secrets.PAGAMENTO_WH_VALUE }}|g" deployments/app-pagamentos-deployment.yaml && \
           sed -i.bak "s|DB_PASS|${{ secrets.DB_PASS }}|g" deployments/kustomization.yaml && \
