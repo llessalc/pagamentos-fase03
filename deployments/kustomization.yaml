@@ -1,7 +1,7 @@
 secretGenerator:
   - name: mysql-pass
     literals:
-      - password=${DB_PASS}
+      - password=DB_PASS
 resources:
-  - app-pagamento-deployment.yaml
-  - app-pagamento-hpa.yaml
+  - app-pagamentos-deployment.yaml
+  - app-pagamentos-hpa.yaml

@@ -1,0 +1,39 @@
+name: Deploy services into EKS
+on:
+  workflow_run:
+    workflows: [Build and Push Docker Image to ECR]
+    types:
+      - completed
+
+env:
+  EKS_CLUSTER_NAME: fiap-58-eks-cluster
+
+jobs:
+  deploy-aws-eks:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configurando credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region us-east-1
+
+      - name: Deploy to EKS
+        env:
+          IMAGE_TAG: app-pedidos
+        run: |
+          sed -i.bak "s|DOCKER_IMAGE|${{ secrets.URI_REPOSITORY }}:$IMAGE_TAG|g;s|DB_HOST|${{ secrets.DB_HOST }}|g;s|QR_URL_VALUE|${{ secrets.QR_URL_VALUE }}|g;s|MP_TOKEN_VALUE|${{ secrets.MP_TOKEN_VALUE }}|g;s|PAGAMENTO_WH_VALUE|${{ secrets.PAGAMENTO_WH_VALUE }}|g" deployments/app-pagamentos-deployment.yaml && \
+          sed -i.bak "s|DB_PASS|${{ secrets.DB_PASS }}|g" deployments/kustomization.yaml && \
+          kubectl apply -k deployments/
