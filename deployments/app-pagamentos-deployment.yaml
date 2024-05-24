@@ -37,13 +37,13 @@ spec:
     spec:
       containers:
         - name: app-pagamentos
-          image: 373830381913.dkr.ecr.us-east-1.amazonaws.com/fiap-pedidos:app-pagamentos
+          image: DOCKER_IMAGE
           imagePullPolicy: Always
           env:
             - name: MYSQL_DATABASE
               value: pagamento_58
             - name: MYSQL_HOST
-              value: ${DB_HOST}
+              value: DB_HOST
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -51,14 +51,12 @@ spec:
                   key: password
             - name: PEDIDOS_SERVICE
               value: app-pedido
-            - name: MP_USER
-              value: ${MP_USER}
+            - name: QR_URL
+              value: QR_URL_VALUE
             - name: MP_TOKEN
-              value: ${MP_TOKEN}
-            - name: MP_POS
-              value: fiap58POS002
+              value: MP_TOKEN_VALUE
             - name: PAGAMENTO_WH
-              value: ${PAGAMENTO_WH}
+              value: PAGAMENTO_WH_VALUE
 
           ports:
             - containerPort: 8081
