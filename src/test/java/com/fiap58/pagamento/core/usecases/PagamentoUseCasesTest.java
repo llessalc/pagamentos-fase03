@@ -60,7 +60,7 @@ class PagamentoUseCasesTest {
 
         List<ProdutoCarrinhoSaidaDto> produtos = new ArrayList<>();
         produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", 1, expectedPagamento));
-        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(produtos, "jose", now(), "CRIADO");
+        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(1L, produtos, "jose", now(), "CRIADO");
 
         when(consumerApiMP.retornaQrCode(any(Pagamento.class))).thenReturn(new QrCodeDto("aa", expectedQrCode));
         when(consumerPedidos.retornarPedido(any(Long.class))).thenReturn(dadosPedidoDto);
@@ -88,7 +88,7 @@ class PagamentoUseCasesTest {
         for (int i = 1; i < 3; i++) {
             produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", i, "11.97"));
         }
-        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(produtos, "jose", now(), "CRIADO");
+        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(1L, produtos, "jose", now(), "CRIADO");
 
         BigDecimal expectedValorPedido = new BigDecimal("35.91");
 

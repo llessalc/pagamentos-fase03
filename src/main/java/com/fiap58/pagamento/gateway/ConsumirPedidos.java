@@ -2,7 +2,7 @@ package com.fiap58.pagamento.gateway;
 
 
 import com.fiap58.pagamento.dto.DadosPedidoDto;
-import com.fiap58.pagamento.interfaces.ConsumerPedidos;
+import com.fiap58.pagamento.interfaces.IConsumerPedidos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class ConsumirPedidos implements ConsumerPedidos {
+public class ConsumirPedidos implements IConsumerPedidos {
 
     @Autowired
     private Environment environment;

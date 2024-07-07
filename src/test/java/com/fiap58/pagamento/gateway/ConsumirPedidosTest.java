@@ -55,7 +55,7 @@ class ConsumirPedidosTest {
         for (int i = 1; i < 3; i++) {
             produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", i, "30.90"));
         }
-        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(produtos, "jose", now(), "CRIADO");
+        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(1L, produtos, "jose", now(), "CRIADO");
         when(restTemplate.getForEntity(any(String.class),any())).thenReturn(ResponseEntity.ok().body(dadosPedidoDto));
 
         // Act
@@ -72,7 +72,7 @@ class ConsumirPedidosTest {
         // Arrange
         List<ProdutoCarrinhoSaidaDto> produtos = new ArrayList<>();
         produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", 200, "30.90"));
-        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(produtos, "jose", now(), "CRIADO");
+        DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(1L, produtos, "jose", now(), "CRIADO");
         when(restTemplate.postForEntity(any(String.class), any(String.class), any())).thenReturn(ResponseEntity.ok().body(dadosPedidoDto));
 
 

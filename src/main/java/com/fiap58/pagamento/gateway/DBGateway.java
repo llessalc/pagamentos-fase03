@@ -1,9 +1,8 @@
 package com.fiap58.pagamento.gateway;
 
-import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.dto.PagamentoDto;
-import com.fiap58.pagamento.interfaces.DBInterface;
-import com.fiap58.pagamento.interfaces.PagamentoRepository;
+import com.fiap58.pagamento.interfaces.IDB;
+import com.fiap58.pagamento.interfaces.IPagamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DBGateway implements DBInterface {
+public class DBGateway implements IDB {
 
     @Autowired
-    private PagamentoRepository pagamentoRepository;
+    private IPagamentoRepository pagamentoRepository;
 
 
     @Override

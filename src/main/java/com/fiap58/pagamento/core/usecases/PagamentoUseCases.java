@@ -4,11 +4,10 @@ import com.fiap58.pagamento.adapter.PagamentoToPagamentoDto;
 import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
-import com.fiap58.pagamento.gateway.ConsumirPedidos;
-import com.fiap58.pagamento.gateway.DBGateway;
-import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
+import com.fiap58.pagamento.gateway.*;
+import com.fiap58.pagamento.interfaces.IQueuePublisher;
 import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
-import com.fiap58.pagamento.mocks.ConsumerPedidosMock;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +27,12 @@ public class PagamentoUseCases {
     @Autowired
     private ImplConsumerApiMP consumerApiMP;
 
+    @Autowired
+    private  ConsumerApiMPMock consumerApiMPMock;
+
+    @Autowired
+    private QueuePublisher queuePublisher;
+
 
     public PagamentoDto criarPagamento(long id) {
         DadosPedidoDto dadosPedidoDto = consumerPedidos.retornarPedido(id);
@@ -42,6 +47,28 @@ public class PagamentoUseCases {
 
         PagamentoDto pagamentoDto = PagamentoToPagamentoDto.pagamentoToPagamentoDto(pagamento);
 
+        return dbGateway.savePagamento(pagamentoDto);
+
+    }
+
+    @Transactional
+    public PagamentoDto criarPagamentoQueue(DadosPedidoDto dadosPedidoDto) {
+        BigDecimal valorPedido = calculaValorPedido(dadosPedidoDto);
+        Long pedidoId = dadosPedidoDto.id();
+        Pagamento pagamento = new Pagamento(pedidoId);
+        pagamento.setValorTotal(valorPedido);
+
+        QrCodeDto qrCode = consumerApiMPMock.retornaQrCode(pagamento);
+
+        pagamento.setQrCode(qrCode.qr_data());
+        pagamento.setInStoreOrderId(qrCode.in_store_order_id());
+
+        PagamentoDto pagamentoDto = PagamentoToPagamentoDto.pagamentoToPagamentoDto(pagamento);
+
+        //Salva novo pagamento na queue de Pagamentos
+        queuePublisher.publicarPagamento(pagamentoDto);
+
+        //Salva novo pagamento no DB
         return dbGateway.savePagamento(pagamentoDto);
 
     }

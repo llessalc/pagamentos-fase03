@@ -2,7 +2,7 @@ package com.fiap58.pagamento.mocks;
 
 import com.fiap58.pagamento.dto.DadosPedidoDto;
 import com.fiap58.pagamento.dto.ProdutoCarrinhoSaidaDto;
-import com.fiap58.pagamento.interfaces.ConsumerPedidos;
+import com.fiap58.pagamento.interfaces.IConsumerPedidos;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import static java.time.Instant.now;
 
 
 @Service
-public class ConsumerPedidosMock implements ConsumerPedidos  {
+public class ConsumerPedidosMock implements IConsumerPedidos {
 
     @Override
     public DadosPedidoDto retornarPedido(Long id) {
@@ -20,14 +20,14 @@ public class ConsumerPedidosMock implements ConsumerPedidos  {
         for (int i = 1; i < 3; i++) {
             produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", i, "30.90"));
         }
-        return new DadosPedidoDto(produtos, "jose", now(), "CRIADO");
+        return new DadosPedidoDto(id, produtos, "jose", now(), "CRIADO");
 
     }
 
     @Override
     public DadosPedidoDto confirmaPagamento(Long id) {
         List<ProdutoCarrinhoSaidaDto> produtos = List.of(new ProdutoCarrinhoSaidaDto("hamburg", 1, "19.99"));
-        return new DadosPedidoDto(produtos, "jose", now(), "PAGO");
+        return new DadosPedidoDto(id, produtos, "jose", now(), "PAGO");
 
     }
 

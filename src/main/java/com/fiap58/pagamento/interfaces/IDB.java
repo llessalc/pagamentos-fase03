@@ -1,12 +1,11 @@
 package com.fiap58.pagamento.interfaces;
 
-import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.dto.PagamentoDto;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface DBInterface {
+public interface IDB {
 
     PagamentoDto savePagamento(PagamentoDto pagamentoDto);
     List<PagamentoDto> listarPagamentos(int limit);

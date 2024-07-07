@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PagamentoRepository extends JpaRepository<PagamentoDto, Long> {
+public interface IPagamentoRepository extends JpaRepository<PagamentoDto, Long> {
     Optional<PagamentoDto> findByQrCode(String qrCode);
     Optional<PagamentoDto> findByIdPedido(Long idPedido);
 
