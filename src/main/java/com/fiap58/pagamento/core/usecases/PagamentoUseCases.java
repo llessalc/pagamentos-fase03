@@ -5,8 +5,6 @@ import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
 import com.fiap58.pagamento.gateway.*;
-import com.fiap58.pagamento.interfaces.IQueuePublisher;
-import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,22 +20,16 @@ public class PagamentoUseCases {
     private DBGateway dbGateway;
 
     @Autowired
-    private ConsumirPedidos consumerPedidos;
-
-    @Autowired
     private ImplConsumerApiMP consumerApiMP;
-
-    @Autowired
-    private  ConsumerApiMPMock consumerApiMPMock;
 
     @Autowired
     private QueuePublisher queuePublisher;
 
-
-    public PagamentoDto criarPagamento(long id) {
-        DadosPedidoDto dadosPedidoDto = consumerPedidos.retornarPedido(id);
+    @Transactional
+    public PagamentoDto criarPagamento(DadosPedidoDto dadosPedidoDto) {
         BigDecimal valorPedido = calculaValorPedido(dadosPedidoDto);
-        Pagamento pagamento = new Pagamento(id);
+        Long pedidoId = dadosPedidoDto.id();
+        Pagamento pagamento = new Pagamento(pedidoId);
         pagamento.setValorTotal(valorPedido);
 
         QrCodeDto qrCode = consumerApiMP.retornaQrCode(pagamento);
@@ -47,26 +39,8 @@ public class PagamentoUseCases {
 
         PagamentoDto pagamentoDto = PagamentoToPagamentoDto.pagamentoToPagamentoDto(pagamento);
 
-        return dbGateway.savePagamento(pagamentoDto);
-
-    }
-
-    @Transactional
-    public PagamentoDto criarPagamentoQueue(DadosPedidoDto dadosPedidoDto) {
-        BigDecimal valorPedido = calculaValorPedido(dadosPedidoDto);
-        Long pedidoId = dadosPedidoDto.id();
-        Pagamento pagamento = new Pagamento(pedidoId);
-        pagamento.setValorTotal(valorPedido);
-
-        QrCodeDto qrCode = consumerApiMPMock.retornaQrCode(pagamento);
-
-        pagamento.setQrCode(qrCode.qr_data());
-        pagamento.setInStoreOrderId(qrCode.in_store_order_id());
-
-        PagamentoDto pagamentoDto = PagamentoToPagamentoDto.pagamentoToPagamentoDto(pagamento);
-
         //Salva novo pagamento na queue de Pagamentos
-        queuePublisher.publicarPagamento(pagamentoDto);
+        queuePublisher.publicarPagamentoCriado(pagamentoDto);
 
         //Salva novo pagamento no DB
         return dbGateway.savePagamento(pagamentoDto);
@@ -101,7 +75,8 @@ public class PagamentoUseCases {
         return dbGateway.buscarPagamentoPorIdPedido(id);
     }
 
-    public String confirmarPagamentoHook(PagamentoWhDto pagamentoWhDto) {
+    @Transactional
+    public String handlePagamentoHook(PagamentoWhDto pagamentoWhDto) {
         //Status pode ser opened, closed, expired. A confirmação
         // se dá com status closed
 
@@ -120,17 +95,10 @@ public class PagamentoUseCases {
                 PagamentoDto pagamentoDto = pagamentoDtoOpt.get();
 
                 if (pagamentoStatus.equals("closed")) {
-                    System.out.println("Pedido pago!");
-                    pagamentoDto.setStatus(StatusPagamento.PAGO);
-                    dbGateway.savePagamento(pagamentoDto);
-
-                    //Confirmar ao serviço de pedidos que o Pagamento foi realizado
-                    consumerPedidos.confirmaPagamento(pagamentoId);
+                    this.confirmarPagamento(pagamentoDto);
 
                 } else if (pagamentoStatus.equals("expired")) {
-                    System.out.println("Pedido cancelado!");
-                    pagamentoDto.setStatus(StatusPagamento.CANCELADO);
-                    dbGateway.savePagamento(pagamentoDto);
+                    this.cancelarPagamento(pagamentoDto);
                 }
 
             }
@@ -143,17 +111,50 @@ public class PagamentoUseCases {
         }
     }
 
+    public void confirmarPagamento(PagamentoDto pagamentoDto) {
+        System.out.println("Pedido pago!");
+        pagamentoDto.setStatus(StatusPagamento.PAGO);
+
+        //Confirmar ao serviço de pedidos que o Pagamento foi realizado
+        queuePublisher.publicarPagamentoConfirmado(pagamentoDto);
+
+        dbGateway.savePagamento(pagamentoDto);
+
+    }
+
+    public void cancelarPagamento(PagamentoDto pagamentoDto) {
+        System.out.println("Pedido cancelado!");
+        pagamentoDto.setStatus(StatusPagamento.CANCELADO);
+
+        // Sinalizar ao serviço de pedidos que o pagamento foi cancelado
+        queuePublisher.publicarPagamentoCancelado(pagamentoDto);
+
+        dbGateway.savePagamento(pagamentoDto);
+    }
+
+    @Transactional
     public Boolean confirmarPagamentoManual(long id) {
         Optional<PagamentoDto> pagamentoDtoOpt = this.buscarPagamento(id);
         if (pagamentoDtoOpt.isPresent()) {
             PagamentoDto pagamentoDto = pagamentoDtoOpt.get();
 
-            pagamentoDto.setStatus(StatusPagamento.PAGO);
-
-            dbGateway.savePagamento(pagamentoDto);
+            this.confirmarPagamento(pagamentoDto);
 
             return Boolean.TRUE;
 
+        }
+
+        return Boolean.FALSE;
+    }
+
+    @Transactional
+    public Boolean cancelarPagamentoManual(long id) {
+        Optional<PagamentoDto> pagamentoDtoOpt = this.buscarPagamento(id);
+        if (pagamentoDtoOpt.isPresent()) {
+            PagamentoDto pagamentoDto = pagamentoDtoOpt.get();
+
+            this.cancelarPagamento(pagamentoDto);
+            return Boolean.TRUE;
         }
 
         return Boolean.FALSE;

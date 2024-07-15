@@ -19,15 +19,36 @@ public class QueuePublisher implements IQueuePublisher {
     private SqsTemplate sqsTemplate;
 
     @Value("${events.queue-pagamentos-criados}")
-    private String queueName;
+    private String queuePagamentosCriados;
+
+    @Value("${events.queue-pagamentos-confirmados}")
+    private String queuePagamentosConfirmados;
+
+    @Value("${events.queue-pagamentos-cancelados}")
+    private String queuePagamentosCancelados;
 
     @Override
-    public void publicarPagamento(PagamentoDto pagamentoDto) {
+    public void publicarPagamento(PagamentoDto pagamentoDto, String queueName) {
         Gson gson = new GsonBuilder().registerTypeAdapter(Instant.class, new InstantAdapter()).create();
         String pagamentoMsg = gson.toJson(pagamentoDto);
-        System.out.printf("Enviando pagamento criado à queue: %s", pagamentoMsg);
+        System.out.printf("Enviando pagamento à queue %s: %s", queueName, pagamentoMsg);
         sqsTemplate.send(to -> to.queue(queueName)
                 .payload(pagamentoMsg)
         );
+    }
+
+    @Override
+    public void publicarPagamentoCriado(PagamentoDto pagamentoDto) {
+        this.publicarPagamento(pagamentoDto, this.queuePagamentosCriados);
+    }
+
+    @Override
+    public void publicarPagamentoConfirmado(PagamentoDto pagamentoDto) {
+        this.publicarPagamento(pagamentoDto, this.queuePagamentosConfirmados);
+    }
+
+    @Override
+    public void publicarPagamentoCancelado(PagamentoDto pagamentoDto) {
+        this.publicarPagamento(pagamentoDto, this.queuePagamentosCancelados);
     }
 }

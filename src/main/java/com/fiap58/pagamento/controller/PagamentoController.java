@@ -17,13 +17,6 @@ public class PagamentoController {
     @Autowired
     private PagamentoUseCases pagamentoUseCases;
 
-    @Operation(description = "Cria pagamento a partir de um pedido.")
-    @PostMapping("/criar-pagamento/pedido/{id}")
-    public ResponseEntity<PagamentoDto> criarPagamento(@PathVariable long id){
-        PagamentoDto pagamento = pagamentoUseCases.criarPagamento(id);
-        return ResponseEntity.ok(pagamento);
-    }
-
     @Operation(description = "Listar pagamentos criados.")
     @GetMapping("/listar")
     public ResponseEntity<List<PagamentoDto>> listarPagamentos(@RequestParam(name="limit", required = false, defaultValue = "-1") int limit) {
@@ -47,7 +40,7 @@ public class PagamentoController {
 
     @PostMapping("/confirmar-pagamento-wh")
     public ResponseEntity confirmarPagamentoHook(@RequestBody PagamentoWhDto pagamentoWhDto) {
-        String pagamentoStatus = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        String pagamentoStatus = pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         return ResponseEntity.ok(pagamentoStatus);
 
@@ -55,10 +48,17 @@ public class PagamentoController {
 
     @PostMapping("/confirmar-pagamento-manual/{id}")
     public ResponseEntity confirmarPagamentoManual(@PathVariable long id) {
-        Boolean pagamentoFoiconfirmado = pagamentoUseCases.confirmarPagamentoManual(id);
+        Boolean pagamentoFoiConfirmado = pagamentoUseCases.confirmarPagamentoManual(id);
 
-        return ResponseEntity.ok(pagamentoFoiconfirmado);
+        return ResponseEntity.ok(pagamentoFoiConfirmado);
 
+    }
+
+    @PostMapping("/cancelar-pagamento-manual/{id}")
+    public ResponseEntity cancelarPagamentoManual(@PathVariable long id) {
+        Boolean pagamentoFoiCancelado = pagamentoUseCases.cancelarPagamentoManual(id);
+
+        return ResponseEntity.ok(pagamentoFoiCancelado);
     }
 
 }

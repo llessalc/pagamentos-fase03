@@ -27,7 +27,7 @@ public class QueueConsumer implements IQueueConsumer {
 
         DadosPedidoDto dadosPedidoDto = PedidoMsgToPedidoDto.pedidoMsgToPedidoDto(message);
 
-        pagamentoUseCases.criarPagamentoQueue(dadosPedidoDto);
+        pagamentoUseCases.criarPagamento(dadosPedidoDto);
 
         System.out.printf("Pedido convertido: %s.", dadosPedidoDto);
         return dadosPedidoDto;

@@ -3,11 +3,8 @@ package com.fiap58.pagamento.core.usecases;
 import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
-import com.fiap58.pagamento.gateway.ConsumirPedidos;
-import com.fiap58.pagamento.gateway.DBGateway;
-import com.fiap58.pagamento.gateway.ImplConsumerApiMP;
+import com.fiap58.pagamento.gateway.*;
 import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
-import com.fiap58.pagamento.mocks.ConsumerPedidosMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,8 +29,9 @@ class PagamentoUseCasesTest {
     DBGateway dbGateway;
     @Mock
     ImplConsumerApiMP consumerApiMP;
+
     @Mock
-    ConsumirPedidos consumerPedidos;
+    QueuePublisher queuePublisher;
 
     @InjectMocks
     PagamentoUseCases pagamentoUseCases;
@@ -63,17 +61,16 @@ class PagamentoUseCasesTest {
         DadosPedidoDto dadosPedidoDto = new DadosPedidoDto(1L, produtos, "jose", now(), "CRIADO");
 
         when(consumerApiMP.retornaQrCode(any(Pagamento.class))).thenReturn(new QrCodeDto("aa", expectedQrCode));
-        when(consumerPedidos.retornarPedido(any(Long.class))).thenReturn(dadosPedidoDto);
         when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
 
         // Act
-        PagamentoDto resPagamentoDto = pagamentoUseCases.criarPagamento(idPedido);
+        PagamentoDto resPagamentoDto = pagamentoUseCases.criarPagamento(dadosPedidoDto);
 
         // Assert
         assertEquals(new BigDecimal(expectedPagamento), resPagamentoDto.getValorTotal());
         assertEquals(expectedQrCode, resPagamentoDto.getQrCode());
 
-        verify(consumerPedidos, times(1)).retornarPedido(any(Long.class));
+        verify(queuePublisher, times(1)).publicarPagamentoCriado(any(PagamentoDto.class));
         verify(consumerApiMP, times(1)).retornaQrCode(any());
         verify(dbGateway, times(1)).savePagamento(any());
 
@@ -146,10 +143,13 @@ class PagamentoUseCasesTest {
         when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
 
         // Act
-        pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         // Assert
         assertEquals(StatusPagamento.PAGO, spyPagamentoDto.getStatus());
+
+        verify(dbGateway, times(1)).savePagamento(any());
+        verify(queuePublisher, times(1)).publicarPagamentoConfirmado(any(PagamentoDto.class));
 
     }
 
@@ -175,10 +175,13 @@ class PagamentoUseCasesTest {
         when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
 
         // Act
-        pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         // Assert
         assertEquals(StatusPagamento.CANCELADO, spyPagamentoDto.getStatus());
+
+        verify(dbGateway, times(1)).savePagamento(any());
+        verify(queuePublisher, times(1)).publicarPagamentoCancelado(any(PagamentoDto.class));
 
     }
 
@@ -204,7 +207,7 @@ class PagamentoUseCasesTest {
         when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
 
         // Act
-        String statusRes = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        String statusRes = pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         // Assert
         assertEquals(StatusPagamento.CRIADO, spyPagamentoDto.getStatus());
@@ -231,11 +234,14 @@ class PagamentoUseCasesTest {
         when(consumerApiMP.retornaPagamentoStatus(any(String.class))).thenReturn(pagamentoWhStatusDto);
 
         // Act
-        String statusRes = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        String statusRes = pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         // Assert
         assertEquals(status, statusRes);
         verify(dbGateway, never()).savePagamento(any());
+        verify(queuePublisher, never()).publicarPagamentoCriado(any());
+        verify(queuePublisher, never()).publicarPagamentoCancelado(any());
+        verify(queuePublisher, never()).publicarPagamentoConfirmado(any());
 
     }
 
@@ -249,7 +255,7 @@ class PagamentoUseCasesTest {
         PagamentoWhDto pagamentoWhDto = new PagamentoWhDto(whResource, whTopic);
 
         // Act
-        String pagamentoStatus = pagamentoUseCases.confirmarPagamentoHook(pagamentoWhDto);
+        String pagamentoStatus = pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
 
         // Assert
         assertEquals(expectedStatus, pagamentoStatus);
@@ -270,6 +276,7 @@ class PagamentoUseCasesTest {
 
         // Assert
         assertEquals(Boolean.TRUE, confirmation);
+        verify(queuePublisher, times(1)).publicarPagamentoConfirmado(any());
 
     }
 
@@ -285,6 +292,38 @@ class PagamentoUseCasesTest {
         // Assert
         assertEquals(Boolean.FALSE, confirmation);
         verify(dbGateway, never()).savePagamento(any());
+
+    }
+
+    @Test
+    void cancelarPagamentoManual() {
+        // Arrange
+        long idPedido = 1L;
+        PagamentoDto pagamentoDto = new PagamentoDto(idPedido, new BigDecimal("10"));
+
+        when(dbGateway.buscarPagamento(any(long.class))).thenReturn(Optional.of(pagamentoDto));
+        when(dbGateway.savePagamento(any(PagamentoDto.class))).then(AdditionalAnswers.returnsFirstArg());
+
+        // Act
+        Boolean confirmation = pagamentoUseCases.cancelarPagamentoManual(idPedido);
+
+        // Assert
+        assertEquals(Boolean.TRUE, confirmation);
+        verify(queuePublisher, times(1)).publicarPagamentoCancelado(any());
+    }
+
+    @Test
+    void cancelarPagamentoManual_PagamentoNotFound() {
+        // Arrange
+        Long pagamentoId = 1L;
+
+        // Act
+        Boolean confirmation = pagamentoUseCases.confirmarPagamentoManual(pagamentoId);
+
+        // Assert
+        assertEquals(Boolean.FALSE, confirmation);
+        verify(dbGateway, never()).savePagamento(any());
+        verify(queuePublisher, never()).publicarPagamentoCancelado(any());
 
     }
 
@@ -319,6 +358,41 @@ class PagamentoUseCasesTest {
 
         //Assert
         assertEquals(Boolean.FALSE, isOrderNotification);
+    }
+
+
+    @Test
+    void confirmarPagamento() {
+        //Arrange
+        long idPedido = 1L;
+        PagamentoDto pagamentoDto = new PagamentoDto(idPedido, new BigDecimal("10"));
+        PagamentoDto spyPagamentoDto = spy(pagamentoDto);
+
+        //Act
+
+        pagamentoUseCases.confirmarPagamento(spyPagamentoDto);
+
+        //Assert
+        assertEquals(StatusPagamento.PAGO, spyPagamentoDto.getStatus());
+        verify(queuePublisher, times(1)).publicarPagamentoConfirmado(any());
+        verify(dbGateway, times(1)).savePagamento(any());
+    }
+
+    @Test
+    void cancelarPagamento() {
+        //Arrange
+        long idPedido = 1L;
+        PagamentoDto pagamentoDto = new PagamentoDto(idPedido, new BigDecimal("10"));
+        PagamentoDto spyPagamentoDto = spy(pagamentoDto);
+
+        //Act
+
+        pagamentoUseCases.cancelarPagamento(spyPagamentoDto);
+
+        //Assert
+        assertEquals(StatusPagamento.CANCELADO, spyPagamentoDto.getStatus());
+        verify(queuePublisher, times(1)).publicarPagamentoCancelado(any());
+        verify(dbGateway, times(1)).savePagamento(any());
     }
 }
 
