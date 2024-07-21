@@ -8,13 +8,13 @@ Sendo que a criação de um novo pagamento se dá pela publicação de
 um novo pedido pelo serviço de pedidos, quando o pagamento é criado,
 o mesmo é persistido no banco de dados de pagamentos e publicado em
 uma fila. Para a confirmação, o serviço disponibiliza um webhook
-que deverá ser chamada pelo MercadoPago quando o clinte realizar o pagamento,
-assim que o webhook é acionado, o serviço verifica a situação do
+que deverá ser chamada pelo MercadoPago quando o cliente realizar o pagamento.
+Assim que o webhook é acionado, o serviço verifica a situação do
 pagamento e, caso o mesmo esteja pago, atualiza o banco de 
-pagamento e envia o pagamento confirmado para a fila de connfirmados.
+pagamento e envia o pagamento confirmado para a fila de confirmados.
 Por fim, há também a possibilidade de o pagamento ser cancelado, nessa
 situação o serviço também atualizará o seu próprio banco e publicará
-o pagamento cancelado na file de cancelados.
+o pagamento cancelado na fila de cancelados.
 
 ## Comunicação com outros serviços
 - pedidos-queue: O serviço escuta essa fila e cria pagamentos quando recebe novos pedidos.
