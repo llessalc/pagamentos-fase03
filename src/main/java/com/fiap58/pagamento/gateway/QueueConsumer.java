@@ -15,9 +15,6 @@ public class QueueConsumer implements IQueueConsumer {
     @Autowired
     private PagamentoUseCases pagamentoUseCases;
 
-    @Autowired
-    private SqsTemplate sqsTemplate;
-
 
     //The default ack is ON_SUCCESS.
     @Override

@@ -318,7 +318,7 @@ class PagamentoUseCasesTest {
         Long pagamentoId = 1L;
 
         // Act
-        Boolean confirmation = pagamentoUseCases.confirmarPagamentoManual(pagamentoId);
+        Boolean confirmation = pagamentoUseCases.cancelarPagamentoManual(pagamentoId);
 
         // Assert
         assertEquals(Boolean.FALSE, confirmation);
