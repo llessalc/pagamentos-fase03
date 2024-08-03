@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,5 +47,15 @@ public class DBGateway implements IDB {
 
     @Override
     public Optional<PagamentoDto> buscarPagamentoPorIdPedido(long id) {return pagamentoRepository.findByIdPedido(id);}
+
+    @Override
+    public void excluirPagamento(Long id) {
+        Optional<PagamentoDto> pagamento = pagamentoRepository.findById(id);
+        if(pagamento.isPresent()){
+            PagamentoDto pagamentoDto1 = pagamento.get();
+            pagamentoDto1.setDeletadoEm(Instant.now());
+            pagamentoRepository.save(pagamentoDto1);
+        }
+    }
 
 }
