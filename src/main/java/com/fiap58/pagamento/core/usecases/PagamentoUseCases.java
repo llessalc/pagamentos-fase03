@@ -32,7 +32,8 @@ public class PagamentoUseCases {
         Pagamento pagamento = new Pagamento(pedidoId);
         pagamento.setValorTotal(valorPedido);
 
-        QrCodeDto qrCode = consumerApiMP.retornaQrCode(pagamento);
+        //QrCodeDto qrCode = consumerApiMP.retornaQrCode(pagamento);
+        QrCodeDto qrCode = new QrCodeDto("Teste", "Teste");
 
         pagamento.setQrCode(qrCode.qr_data());
         pagamento.setInStoreOrderId(qrCode.in_store_order_id());
@@ -64,15 +65,33 @@ public class PagamentoUseCases {
     }
 
     public Optional<PagamentoDto> buscarPagamento(long id) {
-        return dbGateway.buscarPagamento(id);
+        Optional<PagamentoDto> pagamentoDto = dbGateway.buscarPagamento(id);
+        if(pagamentoDto.isPresent()){
+            if (pagamentoDto.get().getDeletadoEm() != null){
+                return Optional.empty();
+            }
+        }
+        return pagamentoDto;
     }
 
     public Optional<PagamentoDto> buscarPagamentoPorQrCode(String qrCode) {
-        return dbGateway.buscarPagamentoPorQrCode(qrCode);
+        Optional<PagamentoDto> pagamentoDto = dbGateway.buscarPagamentoPorQrCode(qrCode);
+        if(pagamentoDto.isPresent()){
+            if (pagamentoDto.get().getDeletadoEm() != null){
+                return Optional.empty();
+            }
+        }
+        return pagamentoDto;
     }
 
     public Optional<PagamentoDto> buscarPagamentoPorIdPedido(long id) {
-        return dbGateway.buscarPagamentoPorIdPedido(id);
+        Optional<PagamentoDto> pagamentoDto = dbGateway.buscarPagamentoPorIdPedido(id);
+        if(pagamentoDto.isPresent()){
+            if (pagamentoDto.get().getDeletadoEm() != null){
+                return Optional.empty();
+            }
+        }
+        return pagamentoDto;
     }
 
     @Transactional
@@ -165,4 +184,11 @@ public class PagamentoUseCases {
     }
 
 
+    public void cancelarPagamentoAutomatico(List<PagamentoDto> pagamentoDtos) {
+        for (PagamentoDto pagamento :pagamentoDtos) {
+            if(pagamento.getIdPagamento() != null){
+                dbGateway.excluirPagamento(pagamento.getIdPagamento());
+            }
+        }
+    }
 }

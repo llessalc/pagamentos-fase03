@@ -37,7 +37,7 @@ public class PagamentoController {
         return ResponseEntity.ok(null);
     }
 
-
+    @Operation(description = "Confirmação automática via WebHook de pagamento")
     @PostMapping("/confirmar-pagamento-wh")
     public ResponseEntity confirmarPagamentoHook(@RequestBody PagamentoWhDto pagamentoWhDto) {
         String pagamentoStatus = pagamentoUseCases.handlePagamentoHook(pagamentoWhDto);
@@ -46,6 +46,7 @@ public class PagamentoController {
 
     }
 
+    @Operation(description = "Confirmação manual de um pagamento")
     @PostMapping("/confirmar-pagamento-manual/{id}")
     public ResponseEntity confirmarPagamentoManual(@PathVariable long id) {
         Boolean pagamentoFoiConfirmado = pagamentoUseCases.confirmarPagamentoManual(id);
@@ -54,11 +55,20 @@ public class PagamentoController {
 
     }
 
+    @Operation(description = "Cancelar um pagamento")
     @PostMapping("/cancelar-pagamento-manual/{id}")
     public ResponseEntity cancelarPagamentoManual(@PathVariable long id) {
         Boolean pagamentoFoiCancelado = pagamentoUseCases.cancelarPagamentoManual(id);
 
         return ResponseEntity.ok(pagamentoFoiCancelado);
+    }
+
+    @Operation(description = "Cancelar um ou mais pagamentos")
+    @PostMapping("/cancelar-pagamento-automatico")
+    public ResponseEntity cancelarPagamentoAutomatico(@RequestBody List<PagamentoDto> pagamentoDtos) {
+        pagamentoUseCases.cancelarPagamentoAutomatico(pagamentoDtos);
+
+        return ResponseEntity.ok(null);
     }
 
 }

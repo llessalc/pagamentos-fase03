@@ -12,4 +12,5 @@ public interface IDB {
     Optional<PagamentoDto> buscarPagamento(long id);
     Optional<PagamentoDto> buscarPagamentoPorQrCode(String qrCode);
     Optional<PagamentoDto> buscarPagamentoPorIdPedido(long id);
+    void excluirPagamento(Long id);
 }
