@@ -21,12 +21,12 @@ class PedidoMsgToPedidoDtoTest {
         Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         Long currentEpoch = currentTime.getEpochSecond();
         produtos.add(new ProdutoCarrinhoSaidaDto("hamburg", 1, "15.00"));
-        DadosPedidoDto pedidoDtoSample = new DadosPedidoDto(10L, produtos, "Kleber", currentTime,"CRIADO");
+        DadosPedidoDto pedidoDtoSample = new DadosPedidoDto(10L, produtos, currentTime,"CRIADO");
 
         String pedidoMsg = new StringBuilder()
                                 .append("{ \"id\": 10, \"produtos\": [{\"nome\": \"hamburg\", \"quantidade\": 1,")
                                 .append("\"precoAtual\": \"15.00\"}],")
-                                .append("\"nomeCliente\":\"Kleber\",\"dataPedido\": ")
+                                .append("\"dataPedido\": ")
                                 .append(currentEpoch.toString())
                                 .append(", \"status\": \"CRIADO\"}")
                                 .toString();

@@ -57,6 +57,14 @@ spec:
               value: MP_TOKEN_VALUE
             - name: PAGAMENTO_WH
               value: PAGAMENTO_WH_VALUE
+            - name: PEDIDOS_QUEUE
+              value: pedidos-queue
+            - name: PAGAMENTOS_CRIADOS_QUEUE
+              value: pagamentos-criados-queue
+            - name: PAGAMENTOS_CONFIRMADOS_QUEUE
+              value: pagamentos-confirmados-queue
+            - name: PAGAMENTOS_CANCELADOS_QUEUE
+              value: pagamentos-cancelados-queue
 
           ports:
             - containerPort: 8081

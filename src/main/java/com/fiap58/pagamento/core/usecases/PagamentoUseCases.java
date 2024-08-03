@@ -5,6 +5,7 @@ import com.fiap58.pagamento.core.entity.Pagamento;
 import com.fiap58.pagamento.core.entity.StatusPagamento;
 import com.fiap58.pagamento.dto.*;
 import com.fiap58.pagamento.gateway.*;
+import com.fiap58.pagamento.mocks.ConsumerApiMPMock;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,9 +87,9 @@ public class PagamentoUseCases {
 
             PagamentoWhStatusDto pagamentoWhStatusDto = consumerApiMP.retornaPagamentoStatus(pagamentoUrl);
             String pagamentoStatus = pagamentoWhStatusDto.status();
-            long pagamentoId = pagamentoWhStatusDto.external_reference();
+            long pedidoId = pagamentoWhStatusDto.external_reference();
 
-            Optional<PagamentoDto> pagamentoDtoOpt = this.buscarPagamentoPorIdPedido(pagamentoId);
+            Optional<PagamentoDto> pagamentoDtoOpt = this.buscarPagamentoPorIdPedido(pedidoId);
 
             if (pagamentoDtoOpt.isPresent()) {
 
