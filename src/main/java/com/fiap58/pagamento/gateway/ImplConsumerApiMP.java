@@ -5,7 +5,7 @@ import com.fiap58.pagamento.dto.ItemDto;
 import com.fiap58.pagamento.dto.PagamentoWhStatusDto;
 import com.fiap58.pagamento.dto.QrCodeDto;
 import com.fiap58.pagamento.dto.QrCodeReq;
-import com.fiap58.pagamento.interfaces.ConsumerApiMP;
+import com.fiap58.pagamento.interfaces.IConsumerApiMP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ImplConsumerApiMP implements ConsumerApiMP {
+public class ImplConsumerApiMP implements IConsumerApiMP {
 
     @Autowired
     private Environment environment;

@@ -4,8 +4,9 @@ import java.time.Instant;
 import java.util.List;
 
 public record DadosPedidoDto(
+
+        Long id,
         List<ProdutoCarrinhoSaidaDto> produtos,
-        String nomeCliente,
         Instant dataPedido,
         String status) {
 }
